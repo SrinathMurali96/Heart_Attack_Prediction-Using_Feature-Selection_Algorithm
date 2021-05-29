@@ -18,9 +18,9 @@ The goal of recursive feature elimination (RFE) is to select features by recursi
 
 Then, the least important features are pruned from the current set of features. That procedure is recursively repeated on the pruned set until the desired number of features to select is eventually reached.
 
-**For refernce : http://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.RFE.html **
+**For refernce : http://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.RFE.html**
 
-**SelectKBest: **
+**SelectKBest:**
 
   Select features according to the k highest scores.
   
@@ -30,4 +30,4 @@ Then, the least important features are pruned from the current set of features. 
   f_regression:
   F-value between label/feature for regression tasks.
 
-**For refernce : http://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.SelectKBest.html **
+**For refernce : http://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.SelectKBest.html**
