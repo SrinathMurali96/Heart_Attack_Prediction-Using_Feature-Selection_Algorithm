@@ -1,24 +1,21 @@
 import logging
+import xgboost 
 import traceback
 import pandas as pd
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.preprocessing import LabelEncoder,StandardScaler
 from sklearn.feature_selection import RFE, SelectKBest, f_regression, f_classif
 from pandas.api.types import is_string_dtype
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
-import warnings
-warnings.filterwarnings("ignore")
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.ensemble import AdaBoostClassifier
-import xgboost 
+from sklearn.ensemble import RandomForestClassifier,AdaBoostClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
+
 LOGGER = logging.getLogger(__name__)
 
 class Model:
@@ -44,7 +41,8 @@ class Model:
                     percentage = int((unique_col_length/total_length)*100)
                     if df[i].is_unique or len(pd.unique(df[i])) == 1 or percentage > 80: 
                         df.drop(i, axis=1, inplace=True)
-                        
+                 
+                # Applying Label Encoding to categorical columns   
                 for col in df.columns.values:
                     if df[col].dtype not in ['float64', 'int32']:
                         label_encoder[col] = LabelEncoder()
@@ -65,46 +63,39 @@ class Model:
                     rank_dic = {}
                     for i, k in enumerate(df.columns.values):
                         rank_dic[k] = kbest.scores_[i]
-                
+                        
+                # Feature selection with RFE
                 else:
                     if str_type:
+                        # For classification type
                         lr = DecisionTreeClassifier()
                     else:
+                        # For Regression type
                         lr = DecisionTreeRegressor()
                     rfe = RFE(lr, n_features_to_select=1)
                     rfe.fit(df, y)
-                    rank_dic = {}
+                    rank_dict = {}
                     
                     for i, k in enumerate(df.columns.values):
-                        rank_dic[k] = rfe.ranking_[i]
+                        rank_dict[k] = rfe.ranking_[i]
     
-    
-                sorted_dict = sorted(rank_dic.items(), key=lambda x: x[1])
-                
-                for i in sorted_dict:
-                    x_axis.append(i[0])
-                    y_axis.append(int(i[1]))      
-                
-#                request.session['feature_name'] = x_axis
-#                request.session['feature_rank'] = y_axis
-                
-                rank_dic = dict(sorted(rank_dic.items(), key=lambda x: x[1]))
-                dict_list = list(rank_dic.keys())
-                
-                sig_list = []
+                sorted_dict = sorted(rank_dict.items(), key=lambda x: x[1])                
+                rank_dict = dict(sorted(rank_dict.items(), key=lambda x: x[1]))
+
+                significant_list = []
                 if feature_type == 'RFE':  
-                    length = int(len(rank_dic) * 0.6)
+                    length = int(len(rank_dict) * 0.6)
                     for i in range(0, length):
-                        sig_list.append(dict_list[i])
+                        significant_list.append(dict_list[i])
                 
 
                 elif feature_type == 'SelectKBest':
-                    length = int(len(rank_dic) * 0.6)
+                    length = int(len(rank_dict) * 0.6)
                     for i in range(0, length):
-                        sig_list.append(dict_list[i])
-                    LOGGER.info('Feature Automation Method - Ends')
+                        significant_list.append(dict_list[i])
+                        
                 LOGGER.info('Feature Automation Method - Ends')
-                return sig_list
+                return significant_list
             
     
         except Exception:
@@ -145,14 +136,13 @@ class Model:
             X_train = sc.fit_transform(X_train)
             X_test = sc.transform(X_test)
             
+            # Model Training starts 
             key = ['LogisticRegression','KNeighborsClassifier','SVC','RandomForestClassifier','XGBClassifier','AdaBoostClassifier']
-    
             value = [LogisticRegression(),KNeighborsClassifier(),SVC(),RandomForestClassifier(),xgboost.XGBClassifier(),AdaBoostClassifier()]
-            
             model = dict(zip(key,value))
             
             predicted =[]
-            max_accuracy = -1
+            max_accuracy = 0
             best_algorithm = ''
             for model_name,classifier in model.items():
                 model=classifier
@@ -164,6 +154,7 @@ class Model:
                 if score>max_accuracy:
                     best_algorithm = model_name.upper()
                     max_accuracy = score
+            # Visualizing the accuracy's in bar chart
             plt.figure(figsize = (15,8))
             sns.barplot(x = key, y = predicted)
         
