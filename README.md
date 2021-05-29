@@ -20,13 +20,14 @@ Then, the least important features are pruned from the current set of features. 
 
 **For refernce : http://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.RFE.html **
 
-**SelectKBest**
+**SelectKBest: **
+
   Select features according to the k highest scores.
   
-  f_classif
+  f_classif:
   ANOVA F-value between label/feature for classification tasks.
 
-  f_regression
+  f_regression:
   F-value between label/feature for regression tasks.
 
 **For refernce : http://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.SelectKBest.html **
